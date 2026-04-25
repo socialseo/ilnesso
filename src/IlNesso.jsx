@@ -97,15 +97,24 @@ function pickGame(diff, usedIds) {
   return src[Math.floor(Math.random() * src.length)];
 }
 
+// ─────────────────────────── STORAGE HELPERS ─────────────────────────────────
+function loadState(key, fallback) {
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
+  catch { return fallback; }
+}
+function saveState(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
+}
+
 // ─────────────────────────── ROOT ────────────────────────────────────────────
 export default function IlNesso() {
-  // ── Persistent progress ──
-  const [curLevel,   setCurLevel]   = useState(1);
-  const [wins,       setWins]       = useState(0);
-  const [attLeft,    setAttLeft]    = useState(10);
-  const [totalScore, setTotalScore] = useState(0);
-  const [usedIds,    setUsedIds]    = useState([]);
-  const [completed,  setCompleted]  = useState([]);
+  // ── Persistent progress — caricato dal localStorage ──
+  const [curLevel,   setCurLevel]   = useState(() => loadState("nesso_level", 1));
+  const [wins,       setWins]       = useState(() => loadState("nesso_wins", 0));
+  const [attLeft,    setAttLeft]    = useState(() => loadState("nesso_att", 10));
+  const [totalScore, setTotalScore] = useState(() => loadState("nesso_score", 0));
+  const [usedIds,    setUsedIds]    = useState(() => loadState("nesso_used", []));
+  const [completed,  setCompleted]  = useState(() => loadState("nesso_completed", []));
 
   // ── Session ──
   const [screen,     setScreen]     = useState("home");
@@ -125,6 +134,14 @@ export default function IlNesso() {
   const [resultInfo, setResultInfo] = useState(null);
 
   const lvlCfg = LEVELS[curLevel - 1];
+
+  // ── Salva automaticamente nel localStorage ──
+  useEffect(() => { saveState("nesso_level",     curLevel);   }, [curLevel]);
+  useEffect(() => { saveState("nesso_wins",      wins);       }, [wins]);
+  useEffect(() => { saveState("nesso_att",       attLeft);    }, [attLeft]);
+  useEffect(() => { saveState("nesso_score",     totalScore); }, [totalScore]);
+  useEffect(() => { saveState("nesso_used",      usedIds);    }, [usedIds]);
+  useEffect(() => { saveState("nesso_completed", completed);  }, [completed]);
 
   // ── Start a game ──
   const startGame = useCallback(() => {
