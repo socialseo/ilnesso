@@ -11,7 +11,7 @@ const LEVELS = [
   { n:7, wins:9,  attempts:10, switches:2, diff:4, label:"Gran Maestro" },
   { n:8, wins:10, attempts:10, switches:2, diff:4, label:"Campione" },
 ];
-const START_PTS = 10_000;
+const START_PTS = 20_000;
 const fmt = n => n.toLocaleString("it-IT");
 
 // ─────────────────────────── GHIGLIOTTINE ────────────────────────────────────
@@ -181,7 +181,7 @@ export default function IlNesso() {
       if (isBonus) { p = p * 2; outcome = "bonus"; }
       else          { p = p + 1000; outcome = "correct"; }
     } else {
-      p = Math.max(0, p - 2000); outcome = "wrong";
+      p = Math.max(100, Math.floor(p / 2)); outcome = "wrong";
     }
     setChosen(c => [...c, clue.r]);
     setPts(p); setOutcomes(o => [...o, outcome]);
@@ -419,7 +419,7 @@ function Playing({ round, pts, chosen, outcomes, L, R, feedback, totalScore, lvl
           <div className={`fb-badge ${feedback.outcome}`}>
             {feedback.outcome === "bonus"
               ? <><span className="fb-bonus-lbl">✦ BONUS</span><span className="fb-pts fb-gold">×2</span><span className="fb-sub">{fmt(feedback.pts)} pt</span></>
-              : <><span className="fb-pts">{feedback.outcome==="correct"?"+1.000":"−2.000"}</span><span className="fb-word">{feedback.word}</span></>
+              : <><span className="fb-pts">{feedback.outcome==="correct"?"+1.000":"÷2"}</span><span className="fb-word">{feedback.outcome==="wrong" ? fmt(feedback.pts)+" pt" : feedback.word}</span></>
             }
           </div>
         </div>
