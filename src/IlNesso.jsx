@@ -212,7 +212,7 @@ export default function IlNesso() {
       lvlStatus = "failed";
     }
 
-    setResultInfo({ correct, pts, lvlStatus, newWins, newAtt, finalWord: game.w });
+    setResultInfo({ correct, pts, lvlStatus, newWins, newAtt, finalWord: game.w, clues: allClues, gameClues: game.c, sixth: sixthUsed ? game.s : null, sixthExp: game.se });
     setScreen("result");
   };
 
@@ -503,7 +503,7 @@ function Final({ pts, clues, sixthUsed, swLeft, onSwitch, totalScore, lvlCfg, wi
 
 // ─────────────────────────── RESULT ──────────────────────────────────────────
 function Result({ info, lvlCfg, onContinue }) {
-  const { correct, pts, lvlStatus, newWins, newAtt, finalWord } = info;
+  const { correct, pts, lvlStatus, newWins, newAtt, finalWord, clues, gameClues, sixth, sixthExp } = info;
   return (
     <div className={`screen result-screen ${correct ? "won" : "lost"}`}>
       <div className="result-inner">
@@ -516,6 +516,29 @@ function Result({ info, lvlCfg, onContinue }) {
                 <p className="res-pts">+{fmt(pts)}</p></>
           : <p className="res-zero">La parola era <strong>{finalWord}</strong></p>
         }
+
+        {/* Spiegazioni indizi */}
+        {clues && clues.length > 0 && (
+          <div className="res-explanations">
+            <p className="res-exp-title">Il significato degli indizi</p>
+            {clues.map((word, i) => {
+              const gc = gameClues?.[i];
+              const exp = gc?.e;
+              return exp ? (
+                <div key={i} className="res-exp-row">
+                  <span className="res-exp-word">{word}</span>
+                  <span className="res-exp-text">{exp}</span>
+                </div>
+              ) : null;
+            })}
+            {sixth && sixthExp && (
+              <div className="res-exp-row sixth">
+                <span className="res-exp-word">{sixth} <span className="sixth-pill">6°</span></span>
+                <span className="res-exp-text">{sixthExp}</span>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="res-level">
           {lvlStatus === "passed" && (
@@ -744,6 +767,13 @@ html,body{height:100%;background:var(--bg)}
 .ans-inp{background:var(--s1);border:1px solid var(--bhi);border-radius:8px;color:var(--glt);font-family:'Cormorant Garamond',serif;font-size:clamp(26px,8vw,42px);font-weight:700;letter-spacing:6px;text-transform:uppercase;text-align:center;padding:20px 14px;width:100%;outline:none;caret-color:var(--gold);transition:border-color .2s,box-shadow .2s}
 .ans-inp:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,162,39,.1)}
 .ans-inp::placeholder{color:rgba(201,162,39,.18)}
+
+.res-explanations{width:100%;display:flex;flex-direction:column;gap:10px;margin:4px 0}
+.res-exp-title{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--muted);text-align:left;margin-bottom:4px}
+.res-exp-row{display:flex;flex-direction:column;gap:4px;background:var(--s1);border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:6px;padding:12px 14px;text-align:left}
+.res-exp-row.sixth{border-left-color:var(--bonus)}
+.res-exp-word{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gold-lt)}
+.res-exp-text{font-size:12px;color:var(--muted);line-height:1.6}
 
 /* RESULT */
 .result-screen{align-items:center;justify-content:center;text-align:center}
