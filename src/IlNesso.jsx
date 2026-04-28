@@ -91,9 +91,9 @@ function useCounter(target, ms = 550) {
   return v;
 }
 
-function pickGame(diff, usedIds) {
-  const pool = G.filter(g => g.d === diff && !usedIds.includes(g.id));
-  const src  = pool.length ? pool : G.filter(g => g.d === diff);
+function pickGame(usedIds) {
+  const pool = G.filter(g => !usedIds.includes(g.id));
+  const src  = pool.length ? pool : G; // se le hai giocate tutte, ricomincia
   return src[Math.floor(Math.random() * src.length)];
 }
 
@@ -145,7 +145,7 @@ export default function IlNesso() {
 
   // ── Start a game ──
   const startGame = useCallback(() => {
-    const g = pickGame(lvlCfg.diff, usedIds);
+    const g = pickGame(usedIds);
     setGame(g);
     setUsedIds(u => [...u, g.id]);
     setRound(0); setPts(START_PTS);
@@ -160,7 +160,7 @@ export default function IlNesso() {
   // ── Switch mechanic ──
   const doSwitch = useCallback(() => {
     if (swLeft <= 0) return;
-    const g = pickGame(lvlCfg.diff, [...usedIds, game.id]);
+    const g = pickGame([...usedIds, game.id]);
     setGame(g); setUsedIds(u => [...u, g.id]);
     setRound(0); setPts(START_PTS);
     setOutcomes([]); setChosen([]);
