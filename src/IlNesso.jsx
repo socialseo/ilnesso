@@ -770,7 +770,7 @@ html,body{height:100%;background:var(--bg)}
 .word-card:hover{border-color:var(--bhi);transform:translateY(-3px)}
 .word-card:active{transform:scale(.987)}
 .word-card.disabled{opacity:.28;pointer-events:none}
-.word-txt{font-family:'Cormorant Garamond',serif;font-size:clamp(28px,9vw,52px);font-weight:700;letter-spacing:5px;text-transform:uppercase;color:var(--text);position:relative;z-index:1;pointer-events:none}
+.word-txt{font-family:'Cormorant Garamond',serif;font-size:clamp(22px,7vw,40px);font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--text);position:relative;z-index:1;pointer-events:none}
 .cards-sep{text-align:center;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted2);padding:12px 0}
 .feedback-overlay{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:rgba(6,8,15,.55);pointer-events:none;animation:fovl 1.8s ease forwards}
 @keyframes fovl{0%{opacity:0}12%{opacity:1}72%{opacity:1}100%{opacity:0}}
@@ -797,7 +797,7 @@ html,body{height:100%;background:var(--bg)}
 .clue-list{display:flex;flex-direction:column;gap:8px}
 .clue-row{display:flex;align-items:center;gap:14px;background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:12px 16px}
 .clue-n{font-size:11px;color:var(--muted);letter-spacing:2px;width:22px;flex-shrink:0}
-.clue-w{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;letter-spacing:3px;text-transform:uppercase;flex:1}
+.clue-w{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;letter-spacing:2px;text-transform:uppercase;flex:1}
 .sixth-pill{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);background:var(--gdim);border:1px solid var(--bhi);border-radius:4px;padding:3px 8px}
 .sixth-btn{display:flex;align-items:center;gap:13px;background:var(--s1);border:1px dashed rgba(201,162,39,.28);border-radius:9px;padding:13px 16px;cursor:pointer;width:100%;text-align:left;transition:all .2s;margin-top:10px}
 .sixth-btn:hover{border-color:var(--gold);background:var(--s2)}
