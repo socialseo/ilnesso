@@ -187,14 +187,16 @@ export default function IlNesso() {
           <Playing round={round} pts={pts} chosen={chosen} outcomes={outcomes}
             L={L} R={R} feedback={feedback} totalScore={totalScore}
             lvlCfg={lvlCfg} wins={wins}
-            isBonus={round === game?.b} onPick={pick} />
+            isBonus={round === game?.b} onPick={pick}
+            onTimeUp={() => pick(Math.random() > .5)} />
         )}
         {screen === "final"    && (
           <Final pts={pts} clues={allClues} sixthUsed={sixthUsed}
             swLeft={swLeft} onSwitch={doSwitch}
             totalScore={totalScore} lvlCfg={lvlCfg} wins={wins}
             answer={answer} onChange={setAnswer} onSubmit={submit}
-            onTakeSixth={takeSixth} />
+            onTakeSixth={takeSixth}
+            onTimePenalty={() => setPts(p => { const n = Math.max(1, Math.floor(p/2)); if(n < 10){ submit(); } return n; })} />
         )}
         {screen === "result"   && resultInfo && (
           <Result info={resultInfo} lvlCfg={lvlCfg}
@@ -322,8 +324,24 @@ function PostaSelect({ bankroll, lvlCfg, onSelect, onBack }) {
 }
 
 // ─────────────────────────── PLAYING ─────────────────────────────────────────
-function Playing({ round, pts, chosen, outcomes, L, R, feedback, totalScore, lvlCfg, wins, isBonus, onPick }) {
+function Playing({ round, pts, chosen, outcomes, L, R, feedback, totalScore, lvlCfg, wins, isBonus, onPick, onTimeUp }) {
   const displayed = useCounter(pts);
+  const [timeLeft, setTimeLeft] = useState(20);
+
+  useEffect(() => {
+    setTimeLeft(20);
+  }, [round]);
+
+  useEffect(() => {
+    if (feedback) return;
+    if (timeLeft <= 0) { onTimeUp(); return; }
+    const t = setTimeout(() => setTimeLeft(s => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [timeLeft, feedback]);
+
+  const pct = (timeLeft / 20) * 100;
+  const timerColor = timeLeft > 10 ? "var(--green)" : timeLeft > 5 ? "var(--bonus)" : "var(--red)";
+
   return (
     <div className="screen playing-screen">
       <ScoreBar totalScore={totalScore} lvlCfg={lvlCfg} wins={wins} />
@@ -341,6 +359,14 @@ function Playing({ round, pts, chosen, outcomes, L, R, feedback, totalScore, lvl
           </div>
         </div>
       </header>
+
+      {/* Timer indizio */}
+      <div className="timer-row">
+        <div className="timer-track">
+          <div className="timer-fill" style={{ width: `${pct}%`, background: timerColor }} />
+        </div>
+        <span className="timer-num" style={{ color: timerColor }}>{timeLeft}s</span>
+      </div>
 
       <div className="clues-strip">
         {chosen.length === 0
@@ -382,13 +408,46 @@ function WordCard({ word, disabled, onClick }) {
 }
 
 // ─────────────────────────── FINAL ───────────────────────────────────────────
-function Final({ pts, clues, sixthUsed, swLeft, onSwitch, totalScore, lvlCfg, wins, onTakeSixth, answer, onChange, onSubmit }) {
+function Final({ pts, clues, sixthUsed, swLeft, onSwitch, totalScore, lvlCfg, wins, onTakeSixth, answer, onChange, onSubmit, onTimePenalty }) {
   const ref = useRef(null);
   const half = Math.floor(pts / 2);
+  const [elapsed, setElapsed] = useState(0);
+  const FREE_SECS = 60;
+
   useEffect(() => { setTimeout(() => ref.current?.focus(), 80); }, []);
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      setElapsed(e => {
+        const next = e + 1;
+        if (next > FREE_SECS && (next - FREE_SECS) % 10 === 0) {
+          onTimePenalty();
+        }
+        return next;
+      });
+    }, 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const isOvertime   = elapsed > FREE_SECS;
+  const overtimeSecs = isOvertime ? elapsed - FREE_SECS : 0;
+  const nextPenalty  = isOvertime ? 10 - (overtimeSecs % 10) : FREE_SECS - elapsed;
+  const timerColor   = !isOvertime ? (elapsed < 45 ? "var(--green)" : "var(--bonus)") : "var(--red)";
+  const timerPct     = !isOvertime ? ((FREE_SECS - elapsed) / FREE_SECS) * 100 : (nextPenalty / 10) * 100;
+
   return (
     <div className="screen final-screen">
       <ScoreBar totalScore={totalScore} lvlCfg={lvlCfg} wins={wins} />
+
+      <div className="final-timer">
+        <div className="timer-track">
+          <div className="timer-fill" style={{ width: `${timerPct}%`, background: timerColor }} />
+        </div>
+        <span className="timer-num" style={{ color: timerColor }}>
+          {!isOvertime ? `${nextPenalty}s liberi` : `÷2 tra ${nextPenalty}s`}
+        </span>
+      </div>
+
       <div className="final-left">
         <p className="eyebrow">I tuoi indizi</p>
         <div className="clue-list">
@@ -400,8 +459,6 @@ function Final({ pts, clues, sixthUsed, swLeft, onSwitch, totalScore, lvlCfg, wi
             </div>
           ))}
         </div>
-
-        {/* Sesto indizio */}
         {!sixthUsed && (
           <button className="sixth-btn" onClick={onTakeSixth}>
             <span className="sixth-ico">＋</span>
@@ -411,8 +468,6 @@ function Final({ pts, clues, sixthUsed, swLeft, onSwitch, totalScore, lvlCfg, wi
             </span>
           </button>
         )}
-
-        {/* Switch — solo se disponibile */}
         {swLeft > 0 && (
           <button className="switch-btn" onClick={onSwitch}>
             <span className="switch-ico">⇄</span>
@@ -422,7 +477,6 @@ function Final({ pts, clues, sixthUsed, swLeft, onSwitch, totalScore, lvlCfg, wi
             </span>
           </button>
         )}
-
         <div className="pts-row-sm" style={{marginTop:20,paddingTop:16,borderTop:"1px solid var(--border)"}}>
           <span className="pts-lbl">Punti partita</span>
           <span className="pts-val">{fmt(pts)}</span>
@@ -669,6 +723,13 @@ html,body{height:100%;background:var(--bg)}
 .pc-right{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
 .pc-mult{font-family:'Bebas Neue';font-size:32px;color:var(--gold);letter-spacing:1px;line-height:1}
 .pc-cost{font-size:12px;color:var(--red)}
+
+/* TIMER */
+.timer-row{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.final-timer{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.timer-track{flex:1;height:4px;background:var(--s2);border-radius:2px;overflow:hidden}
+.timer-fill{height:100%;border-radius:2px;transition:width 1s linear,background .3s}
+.timer-num{font-family:'Bebas Neue';font-size:18px;letter-spacing:1px;flex-shrink:0;min-width:80px;text-align:right}
 
 /* PLAYING */
 .playing-screen{padding-top:24px}
