@@ -188,7 +188,7 @@ export default function IlNesso() {
             L={L} R={R} feedback={feedback} totalScore={totalScore}
             lvlCfg={lvlCfg} wins={wins}
             isBonus={round === game?.b} onPick={pick}
-            onTimeUp={() => pick(Math.random() > .5)} />
+            onTimeUp={() => onPick(leftIs ? false : true)} />
         )}
         {screen === "final"    && (
           <Final pts={pts} clues={allClues} sixthUsed={sixthUsed}
@@ -413,6 +413,7 @@ function Final({ pts, clues, sixthUsed, swLeft, onSwitch, totalScore, lvlCfg, wi
   const half = Math.floor(pts / 2);
   const [elapsed, setElapsed] = useState(0);
   const FREE_SECS = 60;
+  const PENALTY_INTERVAL = 5;
 
   useEffect(() => { setTimeout(() => ref.current?.focus(), 80); }, []);
 
@@ -420,7 +421,7 @@ function Final({ pts, clues, sixthUsed, swLeft, onSwitch, totalScore, lvlCfg, wi
     const t = setInterval(() => {
       setElapsed(e => {
         const next = e + 1;
-        if (next > FREE_SECS && (next - FREE_SECS) % 10 === 0) {
+        if (next > FREE_SECS && (next - FREE_SECS) % PENALTY_INTERVAL === 0) {
           onTimePenalty();
         }
         return next;
@@ -431,70 +432,82 @@ function Final({ pts, clues, sixthUsed, swLeft, onSwitch, totalScore, lvlCfg, wi
 
   const isOvertime   = elapsed > FREE_SECS;
   const overtimeSecs = isOvertime ? elapsed - FREE_SECS : 0;
-  const nextPenalty  = isOvertime ? 10 - (overtimeSecs % 10) : FREE_SECS - elapsed;
+  const nextPenalty  = isOvertime ? PENALTY_INTERVAL - (overtimeSecs % PENALTY_INTERVAL) : FREE_SECS - elapsed;
   const timerColor   = !isOvertime ? (elapsed < 45 ? "var(--green)" : "var(--bonus)") : "var(--red)";
-  const timerPct     = !isOvertime ? ((FREE_SECS - elapsed) / FREE_SECS) * 100 : (nextPenalty / 10) * 100;
+  const timerPct     = !isOvertime ? ((FREE_SECS - elapsed) / FREE_SECS) * 100 : (nextPenalty / PENALTY_INTERVAL) * 100;
 
   return (
     <div className="screen final-screen">
+      {/* Top: punteggio + livello */}
       <ScoreBar totalScore={totalScore} lvlCfg={lvlCfg} wins={wins} />
 
+      {/* Timer bar full width */}
       <div className="final-timer">
         <div className="timer-track">
           <div className="timer-fill" style={{ width: `${timerPct}%`, background: timerColor }} />
         </div>
-        <span className="timer-num" style={{ color: timerColor }}>
-          {!isOvertime ? `${nextPenalty}s liberi` : `÷2 tra ${nextPenalty}s`}
+        <span className="timer-label" style={{ color: timerColor }}>
+          {!isOvertime
+            ? `${nextPenalty}s`
+            : `÷2 tra ${nextPenalty}s`}
         </span>
       </div>
+      {isOvertime && (
+        <p className="timer-warning">⚠️ I punti si dimezzano ogni 5 secondi</p>
+      )}
 
-      <div className="final-left">
-        <p className="eyebrow">I tuoi indizi</p>
-        <div className="clue-list">
-          {clues.map((w, i) => (
-            <div key={i} className="clue-row">
-              <span className="clue-n">{String(i+1).padStart(2,"0")}</span>
-              <span className="clue-w">{w}</span>
-              {sixthUsed && i === clues.length-1 && i >= 5 && <span className="sixth-pill">6°</span>}
-            </div>
-          ))}
+      {/* Two columns */}
+      <div className="final-cols">
+        {/* LEFT — indizi */}
+        <div className="final-left">
+          <p className="eyebrow">I tuoi indizi</p>
+          <div className="clue-list">
+            {clues.map((w, i) => (
+              <div key={i} className="clue-row">
+                <span className="clue-n">{String(i+1).padStart(2,"0")}</span>
+                <span className="clue-w">{w}</span>
+                {sixthUsed && i === clues.length-1 && i >= 5 && <span className="sixth-pill">6°</span>}
+              </div>
+            ))}
+          </div>
+          {!sixthUsed && (
+            <button className="sixth-btn" onClick={onTakeSixth}>
+              <span className="sixth-ico">＋</span>
+              <span>
+                <span className="sixth-title">Sesto indizio</span>
+                <span className="sixth-cost">Costo: ÷2 → {fmt(half)} pt rimasti</span>
+              </span>
+            </button>
+          )}
+          {swLeft > 0 && (
+            <button className="switch-btn" onClick={onSwitch}>
+              <span className="switch-ico">⇄</span>
+              <span>
+                <span className="switch-title">Cambia parola</span>
+                <span className="switch-sub">{swLeft} switch · riparte da capo</span>
+              </span>
+            </button>
+          )}
         </div>
-        {!sixthUsed && (
-          <button className="sixth-btn" onClick={onTakeSixth}>
-            <span className="sixth-ico">＋</span>
-            <span>
-              <span className="sixth-title">Sesto indizio</span>
-              <span className="sixth-cost">Costo: ÷2 → {fmt(half)} pt rimasti</span>
-            </span>
-          </button>
-        )}
-        {swLeft > 0 && (
-          <button className="switch-btn" onClick={onSwitch}>
-            <span className="switch-ico">⇄</span>
-            <span>
-              <span className="switch-title">Cambia parola</span>
-              <span className="switch-sub">{swLeft} switch disponibili · riparte da capo</span>
-            </span>
-          </button>
-        )}
-        <div className="pts-row-sm" style={{marginTop:20,paddingTop:16,borderTop:"1px solid var(--border)"}}>
-          <span className="pts-lbl">Punti partita</span>
-          <span className="pts-val">{fmt(pts)}</span>
-        </div>
-      </div>
 
-      <div className="final-right">
-        <p className="eyebrow">La parola del nesso</p>
-        <p className="final-q">Qual è la parola che le unisce tutte?</p>
-        <input ref={ref} className="ans-inp" value={answer}
-          onChange={e => onChange(e.target.value.toUpperCase())}
-          placeholder="SCRIVI QUI"
-          onKeyDown={e => e.key==="Enter" && answer.trim() && onSubmit()}
-          autoCapitalize="characters" spellCheck={false} />
-        <button className="btn-primary" onClick={onSubmit}
-          disabled={!answer.trim()} style={{opacity: answer.trim()?1:0.35}}>
-          <span>Risposta finale</span><span className="btn-arr">→</span>
-        </button>
+        {/* RIGHT — input + punti */}
+        <div className="final-right">
+          <p className="eyebrow">La parola del nesso</p>
+          <p className="final-q">Qual è la parola che le unisce tutte?</p>
+          <input ref={ref} className="ans-inp" value={answer}
+            onChange={e => onChange(e.target.value.toUpperCase())}
+            placeholder="SCRIVI QUI"
+            onKeyDown={e => e.key==="Enter" && answer.trim() && onSubmit()}
+            autoCapitalize="characters" spellCheck={false} />
+          <button className="btn-primary" onClick={onSubmit}
+            disabled={!answer.trim()} style={{opacity: answer.trim()?1:0.35}}>
+            <span>Risposta finale</span><span className="btn-arr">→</span>
+          </button>
+          <div className="pts-row-sm" style={{marginTop:20,paddingTop:16,borderTop:"1px solid var(--border)"}}>
+            <span className="pts-lbl">Punti partita</span>
+            <span className="pts-val">{fmt(pts)}</span>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -773,9 +786,14 @@ html,body{height:100%;background:var(--bg)}
 .fb-sub{font-family:'Bebas Neue';font-size:26px;color:var(--bonus);letter-spacing:2px;opacity:.8}
 
 /* FINAL */
-.final-screen{gap:36px}
-.final-left{display:flex;flex-direction:column}
+.final-screen{gap:16px}
+.final-timer{display:flex;align-items:center;gap:12px}
+.timer-label{font-family:'Bebas Neue';font-size:20px;letter-spacing:1px;flex-shrink:0;min-width:100px;text-align:right;transition:color .3s}
+.timer-warning{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--red);text-align:center;animation:fadein .3s}
+.final-cols{display:flex;flex-direction:column;gap:24px;flex:1}
+.final-left{display:flex;flex-direction:column;gap:10px}
 .final-right{display:flex;flex-direction:column;gap:14px}
+.final-q{font-size:14px;color:var(--muted);line-height:1.65}
 .clue-list{display:flex;flex-direction:column;gap:8px}
 .clue-row{display:flex;align-items:center;gap:14px;background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:12px 16px}
 .clue-n{font-size:11px;color:var(--muted);letter-spacing:2px;width:22px;flex-shrink:0}
@@ -833,7 +851,7 @@ html,body{height:100%;background:var(--bg)}
   .cards-area{flex-direction:row;align-items:stretch}
   .word-card{flex:1;padding:clamp(44px,8vh,72px) 24px}
   .cards-sep{padding:0 14px;display:flex;align-items:center}
-  .final-screen{flex-direction:row;align-items:flex-start;gap:48px}
+  .final-cols{flex-direction:row;align-items:flex-start;gap:48px}
   .final-left{flex:1.1}.final-right{flex:1;position:sticky;top:40px}
   .posta-list{flex-direction:row;flex-wrap:wrap}.posta-card{flex:1;min-width:160px}
 }
