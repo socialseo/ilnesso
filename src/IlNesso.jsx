@@ -78,6 +78,8 @@ export default function IlNesso() {
   const [leftIs,     setLeftIs]     = useState(true);
   const [resultInfo, setResultInfo] = useState(null);
 
+  const [rulesOpen, setRulesOpen] = useState(false);
+
   const lvlCfg = LEVELS[curLevel - 1];
 
   // ── Salva automaticamente nel localStorage ──
@@ -181,8 +183,9 @@ export default function IlNesso() {
       <style>{CSS}</style>
       <div className="app">
         <div className="bg-glow" /><div className="noise" />
-        {screen === "home"     && <Home onStart={() => setScreen("levelmap")} />}
-        {screen === "levelmap" && <LevelMap lvlCfg={lvlCfg} curLevel={curLevel} wins={wins} attLeft={attLeft} completed={completed} totalScore={totalScore} onPlay={startGame} />}
+        {screen === "home"     && <Home onStart={() => setScreen("levelmap")} onRules={() => setRulesOpen(true)} />}
+        {screen === "levelmap" && <LevelMap lvlCfg={lvlCfg} curLevel={curLevel} wins={wins} attLeft={attLeft} completed={completed} totalScore={totalScore} onPlay={startGame} onRules={() => setRulesOpen(true)} />}
+        {rulesOpen && <RulesModal onClose={() => setRulesOpen(false)} />}
         {screen === "playing"  && clue && (
           <Playing round={round} pts={pts} chosen={chosen} outcomes={outcomes}
             L={L} R={R} feedback={feedback} totalScore={totalScore}
@@ -208,7 +211,7 @@ export default function IlNesso() {
 }
 
 // ─────────────────────────── HOME ────────────────────────────────────────────
-function Home({ onStart }) {
+function Home({ onStart, onRules }) {
   return (
     <div className="screen home-screen">
       <div className="home-brand">
@@ -216,15 +219,18 @@ function Home({ onStart }) {
         <h1 className="home-logo">Il<br/>Nesso</h1>
         <p className="home-tagline">Cinque parole.<br/>Un filo invisibile. Trovalo.</p>
       </div>
-      <button className="btn-primary" onClick={onStart}>
-        <span>Entra nel gioco</span><span className="btn-arr">→</span>
-      </button>
+      <div className="home-btns">
+        <button className="btn-primary" onClick={onStart}>
+          <span>Entra nel gioco</span><span className="btn-arr">→</span>
+        </button>
+        <button className="btn-rules" onClick={onRules}>? Regole del gioco</button>
+      </div>
     </div>
   );
 }
 
 // ─────────────────────────── LEVEL MAP ───────────────────────────────────────
-function LevelMap({ lvlCfg, curLevel, wins, attLeft, completed, totalScore, onPlay }) {
+function LevelMap({ lvlCfg, curLevel, wins, attLeft, completed, totalScore, onPlay, onRules }) {
   return (
     <div className="screen lvlmap-screen">
       <div className="lvlmap-header">
@@ -232,9 +238,12 @@ function LevelMap({ lvlCfg, curLevel, wins, attLeft, completed, totalScore, onPl
           <p className="eyebrow">Il Nesso</p>
           <h2 className="lvlmap-title">Livelli</h2>
         </div>
-        <div className="score-pill">
-          <span className="score-pill-lbl">Punteggio</span>
-          <span className="score-pill-val">{fmt(totalScore)}</span>
+        <div className="lvlmap-header-right">
+          <div className="score-pill">
+            <span className="score-pill-lbl">Punteggio</span>
+            <span className="score-pill-val">{fmt(totalScore)}</span>
+          </div>
+          <button className="btn-rules-sm" onClick={onRules}>? Regole</button>
         </div>
       </div>
 
@@ -625,6 +634,55 @@ function ScoreBar({ totalScore, lvlCfg, wins }) {
   );
 }
 
+// ─────────────────────────── RULES MODAL ─────────────────────────────────────
+function RulesModal({ onClose }) {
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-box" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2 className="modal-title">Regole del gioco</h2>
+          <button className="modal-close" onClick={onClose}>✕</button>
+        </div>
+        <div className="modal-body">
+          <div className="rule-section">
+            <p className="rule-section-title">🎯 Obiettivo</p>
+            <p className="rule-text">Trova la parola che collega tutti gli indizi raccolti.</p>
+          </div>
+          <div className="rule-section">
+            <p className="rule-section-title">⚔️ Come si gioca</p>
+            <p className="rule-text">Ogni round presenta due parole. Scegli quella che appartiene alla ghigliottina. Hai <strong>20 secondi</strong> per scegliere — se il tempo scade, la risposta vale come errata.</p>
+          </div>
+          <div className="rule-section">
+            <p className="rule-section-title">💰 Punteggio</p>
+            <div className="rule-pills">
+              <div className="rule-pill correct">+1.000 risposta corretta</div>
+              <div className="rule-pill wrong">÷2 risposta errata</div>
+              <div className="rule-pill bonus">×2 parola BONUS nascosta</div>
+            </div>
+            <p className="rule-text" style={{marginTop:10}}>Si parte da <strong>20.000 punti</strong>. Il punteggio non scende sotto 1.</p>
+          </div>
+          <div className="rule-section">
+            <p className="rule-section-title">➕ Sesto indizio</p>
+            <p className="rule-text">Dopo i 5 round puoi richiedere un sesto indizio. Costo: <strong>÷2 sul montepremi</strong>.</p>
+          </div>
+          <div className="rule-section">
+            <p className="rule-section-title">⏱ Risposta finale</p>
+            <p className="rule-text"><strong>60 secondi gratuiti</strong> per rispondere. Dopo, il montepremi si dimezza ogni <strong>5 secondi</strong>.</p>
+          </div>
+          <div className="rule-section">
+            <p className="rule-section-title">⇄ Switch</p>
+            <p className="rule-text">Dal livello 3 puoi cambiare ghigliottina prima di rispondere. Il gioco riparte da capo con una nuova parola.</p>
+          </div>
+          <div className="rule-section">
+            <p className="rule-section-title">🏆 Livelli</p>
+            <p className="rule-text">Ci sono 8 livelli. Per avanzare devi raggiungere il numero di vittorie richiesto entro 10 partite.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─────────────────────────── CSS ─────────────────────────────────────────────
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=Bebas+Neue&display=swap');
@@ -685,6 +743,33 @@ html,body{height:100%;background:var(--bg)}
 .switch-ico{font-size:20px;color:var(--bonus);width:30px;height:30px;border:1px solid rgba(245,166,35,.3);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .switch-title{display:block;font-size:14px;font-weight:500;color:var(--text)}
 .switch-sub{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+
+/* HOME BTNS */
+.home-btns{display:flex;flex-direction:column;gap:12px}
+.btn-rules{background:transparent;border:1px solid var(--muted2);border-radius:6px;color:var(--muted);font-family:'DM Sans';font-size:13px;font-weight:500;letter-spacing:2px;text-transform:uppercase;padding:14px 24px;cursor:pointer;width:100%;transition:all .2s}
+.btn-rules:hover{border-color:var(--muted);color:var(--text)}
+.btn-rules-sm{background:transparent;border:1px solid var(--muted2);border-radius:6px;color:var(--muted);font-family:'DM Sans';font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;padding:8px 14px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn-rules-sm:hover{border-color:var(--muted);color:var(--text)}
+.lvlmap-header-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(6,8,15,.85);display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);animation:fadein .2s}
+.modal-box{background:var(--s1);border:1px solid var(--border);border-radius:14px;width:100%;max-width:500px;max-height:85svh;display:flex;flex-direction:column;overflow:hidden;animation:modal-up .25s cubic-bezier(.34,1.56,.64,1)}
+@keyframes modal-up{from{opacity:0;transform:translateY(20px) scale(.97)}to{opacity:1;transform:none}}
+.modal-header{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid var(--border);flex-shrink:0}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--gold);letter-spacing:1px}
+.modal-close{background:transparent;border:1px solid var(--muted2);border-radius:50%;width:32px;height:32px;color:var(--muted);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+.modal-close:hover{border-color:var(--text);color:var(--text)}
+.modal-body{overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:18px}
+.rule-section{display:flex;flex-direction:column;gap:6px}
+.rule-section-title{font-size:12px;font-weight:600;letter-spacing:1px;color:var(--text)}
+.rule-text{font-size:13px;color:var(--muted);line-height:1.65}
+.rule-text strong{color:var(--text)}
+.rule-pills{display:flex;flex-direction:column;gap:6px}
+.rule-pill{font-size:12px;font-weight:600;letter-spacing:1px;padding:7px 12px;border-radius:6px}
+.rule-pill.correct{background:rgba(45,212,122,.08);border:1px solid rgba(45,212,122,.25);color:var(--green)}
+.rule-pill.wrong{background:rgba(240,86,74,.08);border:1px solid rgba(240,86,74,.2);color:var(--red)}
+.rule-pill.bonus{background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.25);color:var(--bonus)}
 
 /* HOME */
 .home-screen{justify-content:space-between}
