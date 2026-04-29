@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
+import G from './ghigliottine';
 
 // ─────────────────────────── CONFIG ──────────────────────────────────────────
 const LEVELS = [
