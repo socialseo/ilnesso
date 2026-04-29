@@ -465,23 +465,40 @@ function Result({ info, lvlCfg, onContinue }) {
         {/* Spiegazioni indizi */}
         {clues && clues.length > 0 && (
           <div className="res-explanations">
-            <p className="res-exp-title">Il significato degli indizi</p>
-            {clues.map((word, i) => {
-              const gc = gameClues?.[i];
-              const exp = gc?.e;
-              return exp ? (
-                <div key={i} className="res-exp-row">
-                  <span className="res-exp-word">{word}</span>
-                  <span className="res-exp-text">{exp}</span>
-                </div>
-              ) : null;
-            })}
-            {sixth && sixthExp && (
-              <div className="res-exp-row sixth">
-                <span className="res-exp-word">{sixth} <span className="sixth-pill">6°</span></span>
-                <span className="res-exp-text">{sixthExp}</span>
-              </div>
-            )}
+            <p className="res-exp-title">Spiegazione degli indizi</p>
+            <div className="res-exp-box">
+              {clues.map((word, i) => {
+                const gc = gameClues?.[i];
+                const exp = gc?.e;
+                if (!exp) return null;
+                const bullets = exp.split(';').map(s => s.trim()).filter(Boolean);
+                return (
+                  <div key={i} className="res-exp-item">
+                    <span className="res-exp-word">{word}</span>
+                    {bullets.map((b, j) => (
+                      <div key={j} className="res-exp-bullet">
+                        <span className="res-exp-dot">·</span>
+                        <span>{b}</span>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
+              {sixth && sixthExp && (() => {
+                const bullets = sixthExp.split(';').map(s => s.trim()).filter(Boolean);
+                return (
+                  <div className="res-exp-item sixth">
+                    <span className="res-exp-word">{sixth} <span className="sixth-pill">6°</span></span>
+                    {bullets.map((b, j) => (
+                      <div key={j} className="res-exp-bullet">
+                        <span className="res-exp-dot">·</span>
+                        <span>{b}</span>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+            </div>
           </div>
         )}
 
@@ -713,12 +730,16 @@ html,body{height:100%;background:var(--bg)}
 .ans-inp:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,162,39,.1)}
 .ans-inp::placeholder{color:rgba(201,162,39,.18)}
 
-.res-explanations{width:100%;display:flex;flex-direction:column;gap:10px;margin:4px 0}
-.res-exp-title{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--muted);text-align:left;margin-bottom:4px}
-.res-exp-row{display:flex;flex-direction:column;gap:4px;background:var(--s1);border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:6px;padding:12px 14px;text-align:left}
-.res-exp-row.sixth{border-left-color:var(--bonus)}
-.res-exp-word{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gold-lt)}
-.res-exp-text{font-size:12px;color:var(--muted);line-height:1.6}
+.res-explanations{width:100%;display:flex;flex-direction:column;gap:8px;margin:4px 0}
+.res-exp-title{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--muted);text-align:left;margin-bottom:6px}
+.res-exp-box{display:flex;flex-direction:column;gap:0;background:var(--s1);border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:8px;padding:16px 18px;text-align:left}
+.res-exp-item{padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05)}
+.res-exp-item:first-child{padding-top:0}
+.res-exp-item:last-child{padding-bottom:0;border-bottom:none}
+.res-exp-item.sixth{border-left:none}
+.res-exp-word{display:block;font-family:'Bebas Neue';font-size:16px;letter-spacing:3px;color:var(--gold-lt);margin-bottom:6px}
+.res-exp-bullet{display:flex;gap:10px;align-items:flex-start;padding:2px 0;font-size:13px;color:var(--muted);line-height:1.55;text-transform:none}
+.res-exp-dot{color:var(--gold);font-size:18px;line-height:1.2;flex-shrink:0}
 
 /* RESULT */
 .result-screen{align-items:center;justify-content:center;text-align:center}
