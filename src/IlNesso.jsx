@@ -666,14 +666,19 @@ function RulesModal({ onClose }) {
           </div>
 
           <div className="rule-section">
-            <p className="rule-section-title">💰 PUNTEGGIO</p>
-            <p className="rule-text">Ogni partita parte da <strong>20.000 punti</strong>. Il punteggio varia così:</p>
+            <p className="rule-section-title">💰 PUNTI PARTITA</p>
+            <p className="rule-text">Ogni partita parte da <strong>20.000 punti partita</strong>. Durante la partita il montepremi varia così:</p>
             <div className="rule-pills" style={{marginTop:8}}>
-              <div className="rule-pill correct">+1.000 pt — risposta corretta</div>
-              <div className="rule-pill wrong">÷2 — risposta errata (il montepremi si dimezza)</div>
-              <div className="rule-pill bonus">×2 — parola BONUS nascosta (raddoppia i punti accumulati)</div>
+              <div className="rule-pill correct">+1.000 pt — indizio scelto correttamente</div>
+              <div className="rule-pill wrong">÷2 — indizio sbagliato (il montepremi si dimezza)</div>
+              <div className="rule-pill bonus">×2 — parola BONUS nascosta (il montepremi raddoppia)</div>
             </div>
-            <p className="rule-text" style={{marginTop:10}}>I punti vinti in ogni partita si accumulano nel tuo <strong>punteggio totale</strong>, che cresce livello dopo livello.</p>
+            <p className="rule-text" style={{marginTop:10}}>Se indovini la parola finale, i <strong>punti partita</strong> vengono aggiunti al tuo <strong>punteggio totale</strong>. Se sbagli, la partita vale zero.</p>
+          </div>
+
+          <div className="rule-section">
+            <p className="rule-section-title">📊 PUNTEGGIO TOTALE</p>
+            <p className="rule-text">Il <strong>punteggio totale</strong> è il tuo capitale accumulato nel tempo — cresce partita dopo partita, livello dopo livello. È il punteggio che conta per la classifica dei Campioni.</p>
           </div>
 
           <div className="rule-section">
