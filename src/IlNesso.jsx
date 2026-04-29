@@ -163,14 +163,22 @@ export default function IlNesso() {
     setScreen("result");
   };
 
+  const [championOpen, setChampionOpen] = useState(false);
+
   const goNextLevel = () => {
-    if (curLevel < 8) { setCurLevel(l => l + 1); }
-    setWins(0); setAttLeft(10);
-    setScreen("levelmap"); // mostra mappa solo quando si sblocca un nuovo livello
+    if (curLevel < 8) {
+      setCurLevel(l => l + 1);
+      setWins(0); setAttLeft(10);
+      setScreen("levelmap");
+    } else {
+      // Livello 8 completato — mostra modulo campione
+      setChampionOpen(true);
+      setScreen("levelmap");
+    }
   };
   const retryLevel = () => {
     setWins(0); setAttLeft(10);
-    startGame(); // riparte direttamente senza passare dalla mappa
+    startGame();
   };
 
   const clue    = game?.c[round];
@@ -186,6 +194,7 @@ export default function IlNesso() {
         {screen === "home"     && <Home onStart={() => setScreen("levelmap")} onRules={() => setRulesOpen(true)} />}
         {screen === "levelmap" && <LevelMap lvlCfg={lvlCfg} curLevel={curLevel} wins={wins} attLeft={attLeft} completed={completed} totalScore={totalScore} onPlay={startGame} onRules={() => setRulesOpen(true)} />}
         {rulesOpen && <RulesModal onClose={() => setRulesOpen(false)} />}
+        {championOpen && <ChampionModal totalScore={totalScore} onClose={() => setChampionOpen(false)} />}
         {screen === "playing"  && clue && (
           <Playing round={round} pts={pts} chosen={chosen} outcomes={outcomes}
             L={L} R={R} feedback={feedback} totalScore={totalScore}
@@ -683,6 +692,71 @@ function RulesModal({ onClose }) {
   );
 }
 
+// ─────────────────────────── CHAMPION MODAL ──────────────────────────────────
+function ChampionModal({ totalScore, onClose }) {
+  const [name, setName] = useState("");
+  const [sent, setSent]  = useState(false);
+
+  const handleSend = () => {
+    if (!name.trim()) return;
+    const subject = encodeURIComponent(`Il Nesso — Campione: ${name.trim()}`);
+    const body = encodeURIComponent(
+      `Nome: ${name.trim()}\nPunteggio: ${totalScore.toLocaleString("it-IT")} pt\n\nHo completato tutti gli 8 livelli de Il Nesso!`
+    );
+    window.open(`mailto:campioni@ilnesso.it?subject=${subject}&body=${body}`, "_blank");
+    setSent(true);
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-box champion-box" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2 className="modal-title">🏆 Sei un Campione!</h2>
+          <button className="modal-close" onClick={onClose}>✕</button>
+        </div>
+        <div className="modal-body">
+          {!sent ? (
+            <>
+              <p className="rule-text">Hai completato tutti gli 8 livelli de <strong>Il Nesso</strong>. Registra il tuo punteggio per entrare nella classifica dei Top 10 Campioni.</p>
+
+              <div className="champ-score">
+                <span className="champ-score-lbl">Il tuo punteggio</span>
+                <span className="champ-score-val">{totalScore.toLocaleString("it-IT")}</span>
+                <span className="champ-score-unit">pt</span>
+              </div>
+
+              <div className="champ-field">
+                <label className="champ-label">Il tuo nome</label>
+                <input
+                  className="champ-input"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  placeholder="Scrivi il tuo nome..."
+                  maxLength={40}
+                  autoFocus
+                />
+              </div>
+
+              <button className="btn-primary" onClick={handleSend}
+                disabled={!name.trim()} style={{opacity: name.trim() ? 1 : 0.35}}>
+                <span>🏅 Valida il tuo punteggio</span>
+              </button>
+              <p className="champ-note">Si aprirà la tua app email con il messaggio già pronto. Invialo per entrare in classifica.</p>
+            </>
+          ) : (
+            <div className="champ-sent">
+              <div className="champ-sent-icon">📨</div>
+              <p className="champ-sent-title">Quasi fatto!</p>
+              <p className="rule-text">Invia il messaggio dalla tua app email per completare la registrazione. Ti contatteremo presto!</p>
+              <button className="btn-primary" style={{marginTop:16}} onClick={onClose}>Chiudi</button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─────────────────────────── CSS ─────────────────────────────────────────────
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=Bebas+Neue&display=swap');
@@ -743,6 +817,22 @@ html,body{height:100%;background:var(--bg)}
 .switch-ico{font-size:20px;color:var(--bonus);width:30px;height:30px;border:1px solid rgba(245,166,35,.3);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .switch-title{display:block;font-size:14px;font-weight:500;color:var(--text)}
 .switch-sub{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+
+/* CHAMPION MODAL */
+.champion-box{border-color:rgba(201,162,39,.4)}
+.champ-score{display:flex;align-items:baseline;gap:8px;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px 20px}
+.champ-score-lbl{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-right:auto}
+.champ-score-val{font-family:'Bebas Neue';font-size:44px;color:var(--gold);letter-spacing:2px;line-height:1}
+.champ-score-unit{font-size:12px;color:var(--muted);letter-spacing:2px}
+.champ-field{display:flex;flex-direction:column;gap:8px}
+.champ-label{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted)}
+.champ-input{background:var(--s2);border:1px solid var(--bhi);border-radius:8px;color:var(--text);font-family:'DM Sans';font-size:16px;padding:14px 16px;width:100%;outline:none;caret-color:var(--gold);transition:border-color .2s}
+.champ-input:focus{border-color:var(--gold)}
+.champ-input::placeholder{color:var(--muted2)}
+.champ-note{font-size:11px;color:var(--muted2);line-height:1.6;text-align:center}
+.champ-sent{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:12px 0}
+.champ-sent-icon{font-size:56px}
+.champ-sent-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;color:var(--gold)}
 
 /* HOME BTNS */
 .home-btns{display:flex;flex-direction:column;gap:12px}
