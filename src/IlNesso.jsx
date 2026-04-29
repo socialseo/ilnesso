@@ -653,39 +653,50 @@ function RulesModal({ onClose }) {
           <button className="modal-close" onClick={onClose}>✕</button>
         </div>
         <div className="modal-body">
+
           <div className="rule-section">
-            <p className="rule-section-title">🎯 Obiettivo</p>
-            <p className="rule-text">Trova la parola che collega tutti gli indizi raccolti.</p>
+            <p className="rule-section-title">🎯 OBIETTIVO</p>
+            <p className="rule-text">Trova la parola nascosta che collega tutti gli indizi raccolti durante la partita.</p>
           </div>
+
           <div className="rule-section">
-            <p className="rule-section-title">⚔️ Come si gioca</p>
-            <p className="rule-text">Ogni round presenta due parole. Scegli quella che appartiene alla ghigliottina. Hai <strong>20 secondi</strong> per scegliere — se il tempo scade, la risposta vale come errata.</p>
+            <p className="rule-section-title">⚔️ COME SI GIOCA</p>
+            <p className="rule-text">Ogni round ti mostra due parole: una è l'indizio corretto, l'altra è un distrattore. Scegli quella giusta per aggiungerla alla lista degli indizi.</p>
+            <p className="rule-text" style={{marginTop:6}}>Hai <strong>20 secondi</strong> per scegliere. Se il tempo scade, la risposta vale come errata.</p>
           </div>
+
           <div className="rule-section">
-            <p className="rule-section-title">💰 Punteggio</p>
-            <div className="rule-pills">
-              <div className="rule-pill correct">+1.000 risposta corretta</div>
-              <div className="rule-pill wrong">÷2 risposta errata</div>
-              <div className="rule-pill bonus">×2 parola BONUS nascosta</div>
+            <p className="rule-section-title">💰 PUNTEGGIO</p>
+            <p className="rule-text">Ogni partita parte da <strong>20.000 punti</strong>. Il punteggio varia così:</p>
+            <div className="rule-pills" style={{marginTop:8}}>
+              <div className="rule-pill correct">+1.000 pt — risposta corretta</div>
+              <div className="rule-pill wrong">÷2 — risposta errata (il montepremi si dimezza)</div>
+              <div className="rule-pill bonus">×2 — parola BONUS nascosta (raddoppia i punti accumulati)</div>
             </div>
-            <p className="rule-text" style={{marginTop:10}}>Si parte da <strong>20.000 punti</strong>. Il punteggio non scende sotto 1.</p>
+            <p className="rule-text" style={{marginTop:10}}>I punti vinti in ogni partita si accumulano nel tuo <strong>punteggio totale</strong>, che cresce livello dopo livello.</p>
           </div>
+
           <div className="rule-section">
-            <p className="rule-section-title">➕ Sesto indizio</p>
-            <p className="rule-text">Dopo i 5 round puoi richiedere un sesto indizio. Costo: <strong>÷2 sul montepremi</strong>.</p>
+            <p className="rule-section-title">➕ SESTO INDIZIO</p>
+            <p className="rule-text">Dopo aver raccolto i 5 indizi puoi richiederne un sesto per aiutarti. Costo: <strong>il montepremi si dimezza</strong>.</p>
           </div>
+
           <div className="rule-section">
-            <p className="rule-section-title">⏱ Risposta finale</p>
-            <p className="rule-text"><strong>60 secondi gratuiti</strong> per rispondere. Dopo, il montepremi si dimezza ogni <strong>5 secondi</strong>.</p>
+            <p className="rule-section-title">⏱ RISPOSTA FINALE</p>
+            <p className="rule-text">Hai <strong>60 secondi gratuiti</strong> per inserire la parola finale. Superato il minuto, il montepremi si dimezza ogni <strong>5 secondi</strong> fino a che non rispondi.</p>
           </div>
+
           <div className="rule-section">
-            <p className="rule-section-title">⇄ Switch</p>
-            <p className="rule-text">Dal livello 3 puoi cambiare ghigliottina prima di rispondere. Il gioco riparte da capo con una nuova parola.</p>
+            <p className="rule-section-title">⇄ SWITCH</p>
+            <p className="rule-text">Dal livello 3 puoi cambiare ghigliottina prima di rispondere. Il gioco riparte da capo con una parola diversa. Gli switch disponibili si azzerano a ogni nuovo livello.</p>
           </div>
+
           <div className="rule-section">
-            <p className="rule-section-title">🏆 Livelli</p>
-            <p className="rule-text">Ci sono 8 livelli. Per avanzare devi raggiungere il numero di vittorie richiesto entro 10 partite.</p>
+            <p className="rule-section-title">🏆 LIVELLI E CLASSIFICA</p>
+            <p className="rule-text">Il gioco ha <strong>8 livelli</strong>. Per avanzare devi raggiungere il numero di vittorie richiesto entro 10 partite.</p>
+            <p className="rule-text" style={{marginTop:6}}>Chi completa tutti gli 8 livelli può <strong>registrare il proprio punteggio</strong> e concorrere alla classifica dei <strong>Top 10 Campioni</strong>.</p>
           </div>
+
         </div>
       </div>
     </div>
@@ -852,7 +863,7 @@ html,body{height:100%;background:var(--bg)}
 .modal-close:hover{border-color:var(--text);color:var(--text)}
 .modal-body{overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:18px}
 .rule-section{display:flex;flex-direction:column;gap:6px}
-.rule-section-title{font-size:12px;font-weight:600;letter-spacing:1px;color:var(--text)}
+.rule-section-title{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gold-lt);margin-bottom:2px}
 .rule-text{font-size:13px;color:var(--muted);line-height:1.65}
 .rule-text strong{color:var(--text)}
 .rule-pills{display:flex;flex-direction:column;gap:6px}
