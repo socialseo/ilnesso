@@ -169,9 +169,14 @@ export default function IlNesso() {
     if (curLevel < 8) {
       setCurLevel(l => l + 1);
       setWins(0); setAttLeft(10);
-      setScreen("levelmap");
+      // Mostra modal campione quando si raggiunge il livello 6 (Maestro)
+      if (curLevel + 1 === 6) {
+        setScreen("levelmap");
+        setChampionOpen(true);
+      } else {
+        setScreen("levelmap");
+      }
     } else {
-      // Livello 8 completato — mostra modulo campione
       setChampionOpen(true);
       setScreen("levelmap");
     }
@@ -699,7 +704,7 @@ function RulesModal({ onClose }) {
           <div className="rule-section">
             <p className="rule-section-title">🏆 LIVELLI E CLASSIFICA</p>
             <p className="rule-text">Il gioco ha <strong>8 livelli</strong>. Per avanzare devi raggiungere il numero di vittorie richiesto entro 10 partite.</p>
-            <p className="rule-text" style={{marginTop:6}}>Chi completa tutti gli 8 livelli può <strong>registrare il proprio punteggio</strong> e concorrere alla classifica dei <strong>Top 10 Campioni</strong>.</p>
+            <p className="rule-text" style={{marginTop:6}}>Chi raggiunge almeno il livello 6 — <strong>Maestro</strong> — può registrare il proprio punteggio totale e concorrere alla classifica dei <strong>Top 10 Campioni del Nesso</strong>.</p>
           </div>
 
         </div>
@@ -719,7 +724,7 @@ function ChampionModal({ totalScore, onClose }) {
     const body = encodeURIComponent(
       `Nome: ${name.trim()}\nPunteggio: ${totalScore.toLocaleString("it-IT")} pt\n\nHo completato tutti gli 8 livelli de Il Nesso!`
     );
-    window.open(`mailto:campioni@ilnesso.it?subject=${subject}&body=${body}`, "_blank");
+    window.open(`mailto:classifica@ilnesso.it?subject=${subject}&body=${body}`, "_blank");
     setSent(true);
   };
 
@@ -727,13 +732,13 @@ function ChampionModal({ totalScore, onClose }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-box champion-box" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h2 className="modal-title">🏆 Sei un Campione!</h2>
+          <h2 className="modal-title">🏆 Sei un Maestro!</h2>
           <button className="modal-close" onClick={onClose}>✕</button>
         </div>
         <div className="modal-body">
           {!sent ? (
             <>
-              <p className="rule-text">Hai completato tutti gli 8 livelli de <strong>Il Nesso</strong>. Registra il tuo punteggio per entrare nella classifica dei Top 10 Campioni.</p>
+              <p className="rule-text">Hai raggiunto il livello <strong>Maestro</strong> — la qualifica minima per entrare nella classifica dei Top 10 Campioni del Nesso. Registra il tuo punteggio totale!</p>
 
               <div className="champ-score">
                 <span className="champ-score-lbl">Il tuo punteggio</span>
