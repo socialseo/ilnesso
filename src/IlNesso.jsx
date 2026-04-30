@@ -461,23 +461,31 @@ function Final({ pts, clues, sixthUsed, swLeft, onSwitch, totalScore, lvlCfg, wi
 
   return (
     <div className="screen final-screen">
-      {/* Top: punteggio + livello */}
       <ScoreBar totalScore={totalScore} lvlCfg={lvlCfg} wins={wins} />
 
-      {/* Timer bar full width */}
-      <div className="final-timer">
-        <div className="timer-track">
-          <div className="timer-fill" style={{ width: `${timerPct}%`, background: timerColor }} />
-        </div>
-        <span className="timer-label" style={{ color: timerColor }}>
-          {!isOvertime
-            ? `${nextPenalty}s`
-            : `÷2 tra ${nextPenalty}s`}
-        </span>
+      {/* Punti partita in cima — sempre visibile */}
+      <div className="final-pts-top">
+        <span className="pts-lbl">Punti partita</span>
+        <span className="pts-val">{fmt(pts)}</span>
       </div>
-      {isOvertime && (
-        <p className="timer-warning">⚠️ I punti si dimezzano ogni 5 secondi</p>
-      )}
+
+      {/* Timer — barra verde che scorre fino a 0, poi solo testo countdown */}
+      <div className="final-timer">
+        {!isOvertime ? (
+          <>
+            <div className="timer-track">
+              <div className="timer-fill" style={{ width: `${timerPct}%`, background: timerColor }} />
+            </div>
+            <span className="timer-label" style={{ color: timerColor }}>{nextPenalty}s</span>
+          </>
+        ) : (
+          <div className="overtime-warning">
+            <span className="overtime-icon">⚠️</span>
+            <span className="overtime-text">I punti si dimezzano tra</span>
+            <span className="overtime-count">{nextPenalty}s</span>
+          </div>
+        )}
+      </div>
 
       {/* Two columns */}
       <div className="final-cols">
@@ -513,7 +521,7 @@ function Final({ pts, clues, sixthUsed, swLeft, onSwitch, totalScore, lvlCfg, wi
           )}
         </div>
 
-        {/* RIGHT — input + punti */}
+        {/* RIGHT — input */}
         <div className="final-right">
           <p className="eyebrow">La parola del nesso</p>
           <p className="final-q">Qual è la parola che le unisce tutte?</p>
@@ -526,10 +534,6 @@ function Final({ pts, clues, sixthUsed, swLeft, onSwitch, totalScore, lvlCfg, wi
             disabled={!answer.trim()} style={{opacity: answer.trim()?1:0.35}}>
             <span>Risposta finale</span><span className="btn-arr">→</span>
           </button>
-          <div className="pts-row-sm" style={{marginTop:20,paddingTop:16,borderTop:"1px solid var(--border)"}}>
-            <span className="pts-lbl">Punti partita</span>
-            <span className="pts-val">{fmt(pts)}</span>
-          </div>
         </div>
       </div>
     </div>
@@ -698,7 +702,7 @@ function RulesModal({ onClose }) {
 
           <div className="rule-section">
             <p className="rule-section-title">⇄ SWITCH</p>
-            <p className="rule-text">Dal livello 3 puoi cambiare ghigliottina prima di rispondere. Il gioco riparte da capo con una parola diversa. Gli switch disponibili si azzerano a ogni nuovo livello.</p>
+            <p className="rule-text">Dal livello 3 puoi cambiare <strong>parola segreta</strong> prima di rispondere. Il gioco riparte da capo con una parola diversa. Gli switch disponibili si azzerano a ogni nuovo livello.</p>
           </div>
 
           <div className="rule-section">
@@ -983,9 +987,12 @@ html,body{height:100%;background:var(--bg)}
 
 /* FINAL */
 .final-screen{gap:16px}
-.final-timer{display:flex;align-items:center;gap:12px}
-.timer-label{font-family:'Bebas Neue';font-size:20px;letter-spacing:1px;flex-shrink:0;min-width:100px;text-align:right;transition:color .3s}
-.timer-warning{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--red);text-align:center;animation:fadein .3s}
+.final-pts-top{display:flex;justify-content:space-between;align-items:baseline;background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:10px 16px}
+.final-timer{display:flex;align-items:center;gap:12px;min-height:28px}
+.overtime-warning{display:flex;align-items:center;gap:10px;width:100%}
+.overtime-icon{font-size:18px;flex-shrink:0}
+.overtime-text{font-size:13px;color:var(--red);flex:1}
+.overtime-count{font-family:'Bebas Neue';font-size:32px;color:var(--red);letter-spacing:2px;line-height:1;min-width:48px;text-align:right}
 .final-cols{display:flex;flex-direction:column;gap:24px;flex:1}
 .final-left{display:flex;flex-direction:column;gap:10px}
 .final-right{display:flex;flex-direction:column;gap:14px}
